@@ -1,4 +1,4 @@
-apiVersion: plugin.openeverest.io/v1alpha1
+apiVersion: extensions.openeverest.io/v1alpha1
 kind: Plugin
 metadata:
   name: {{ .Release.Name }}
@@ -14,9 +14,6 @@ spec:
       namespace: {{ .Release.Namespace }}
       name: {{ include "plugin-mongodb-explorer.fullname" . }}
       port: {{ .Values.service.port }}
-    modes:
-      requestHandler:
-        basePath: "/api"
   frontend:
     bundlePath: {{ .Values.plugin.bundlePath | quote }}
     extensionPoints:

@@ -64,7 +64,7 @@ shell fetches at startup to dynamically load the plugin UI.
 
 - An OpenEverest cluster with the Plugin CRD installed (Everest v2+)
 - The OpenEverest monorepo checked out at `../openeverest` (for the local SDK reference)
-- Node.js 20+, Go 1.22+, Docker, Helm 3
+- Node.js 20+, Go 1.25+, Docker, Helm 3
 
 ## Local Development
 
