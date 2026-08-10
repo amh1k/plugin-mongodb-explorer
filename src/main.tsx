@@ -616,6 +616,7 @@ const register: PluginRegisterFn = (api: PluginApi) => {
     type: 'clusterDetailTab',
     label: 'MongoDB Explorer',
     path: 'mongodb-explorer',
+    providers: ['percona-server-mongodb'],
     component: MongoExplorerTab,
   });
 };
