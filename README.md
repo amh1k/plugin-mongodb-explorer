@@ -66,9 +66,9 @@ The backend also serves the frontend bundle at `GET /main.js`, which the OpenEve
 shell fetches at startup to dynamically load the plugin UI.
 
 The sidebar lists only OpenEverest instances whose provider is
-`percona-server-mongodb`. The first available instance is selected automatically;
-users can switch instances from the selector. External MongoDB endpoints are not
-supported yet.
+`percona-server-mongodb`. Users can select an instance from the selector to
+navigate to its existing MongoDB Explorer tab. External MongoDB endpoints are
+not supported yet.
 
 ## Prerequisites
 
