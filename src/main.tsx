@@ -570,23 +570,148 @@ const MongoExplorerPage = (_props: PluginRouteProps) => {
 
   return React.createElement(
     'div',
-    { style: { padding: '1.5rem', height: '100%', boxSizing: 'border-box' } },
-    React.createElement('h1', { style: { margin: '0 0 1rem' } }, 'MongoDB Explorer'),
-    loading ? React.createElement('p', { style: styles.muted }, 'Loading MongoDB instances…') :
-      error ? React.createElement('div', null, React.createElement('p', { style: styles.error }, error), React.createElement('button', { style: styles.btn(true), onClick: loadInstances }, 'Retry')) :
-        instances.length === 0 ? React.createElement('p', { style: styles.muted }, 'No OpenEverest MongoDB instances are available. Deploy a MongoDB instance or ask your administrator for access.') :
-          React.createElement('div', { style: { height: 'calc(100% - 3.5rem)', minHeight: '520px' } },
-            React.createElement('div', { style: { maxWidth: '520px', marginBottom: '1rem' } },
-              React.createElement('label', { style: styles.label }, 'Instance'),
-              React.createElement('select', { defaultValue: '', style: { ...styles.input, fontFamily: 'inherit' }, onChange: (e: { target: { value: string } }) => {
-                const selected = instances.find((instance) => instanceKey(instance) === e.target.value);
-                if (selected) navigateToInstance(selected);
-              } },
-                React.createElement('option', { value: '', disabled: true }, 'Select a MongoDB instance…'),
-                ...instances.map((instance) => React.createElement('option', { key: instanceKey(instance), value: instanceKey(instance) }, `${instance.name} (${instance.k8sCluster} / ${instance.namespace})`))
+    { style: { padding: '1.5rem', height: '100%', boxSizing: 'border-box', overflowY: 'auto' } },
+    React.createElement('h1', { style: { margin: '0 0 0.5rem' } }, 'MongoDB Explorer'),
+    React.createElement(
+      'p',
+      { style: { margin: '0 0 1.5rem', color: '#555', fontSize: '0.9rem', lineHeight: '1.4' } },
+      'Discover and query OpenEverest-managed MongoDB instances. Select an instance below to browse databases, view collections, and run find queries.'
+    ),
+    loading
+      ? React.createElement('p', { style: styles.muted }, 'Loading MongoDB instances…')
+      : error
+      ? React.createElement(
+          'div',
+          null,
+          React.createElement('p', { style: styles.error }, error),
+          React.createElement('button', { style: styles.btn(true), onClick: loadInstances }, 'Retry')
+        )
+      : instances.length === 0
+      ? React.createElement(
+          'p',
+          { style: styles.muted },
+          'No OpenEverest MongoDB instances are available. Deploy a MongoDB instance or ask your administrator for access.'
+        )
+      : React.createElement(
+          'div',
+          { style: { background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', overflow: 'hidden', maxWidth: '900px' } },
+          React.createElement(
+            'table',
+            { style: { width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' } },
+            React.createElement(
+              'thead',
+              null,
+              React.createElement(
+                'tr',
+                null,
+                React.createElement(
+                  'th',
+                  {
+                    style: {
+                      padding: '0.6rem 0.85rem',
+                      background: '#f0f4fb',
+                      borderBottom: '2px solid #c5d0e0',
+                      textAlign: 'left',
+                      fontWeight: '600',
+                      color: '#333',
+                    },
+                  },
+                  'Name'
+                ),
+                React.createElement(
+                  'th',
+                  {
+                    style: {
+                      padding: '0.6rem 0.85rem',
+                      background: '#f0f4fb',
+                      borderBottom: '2px solid #c5d0e0',
+                      textAlign: 'left',
+                      fontWeight: '600',
+                      color: '#333',
+                    },
+                  },
+                  'Namespace'
+                ),
+                React.createElement(
+                  'th',
+                  {
+                    style: {
+                      padding: '0.6rem 0.85rem',
+                      background: '#f0f4fb',
+                      borderBottom: '2px solid #c5d0e0',
+                      textAlign: 'left',
+                      fontWeight: '600',
+                      color: '#333',
+                    },
+                  },
+                  'K8s Cluster'
+                ),
+                React.createElement(
+                  'th',
+                  {
+                    style: {
+                      padding: '0.6rem 0.85rem',
+                      background: '#f0f4fb',
+                      borderBottom: '2px solid #c5d0e0',
+                      textAlign: 'right',
+                      fontWeight: '600',
+                      color: '#333',
+                    },
+                  },
+                  'Action'
+                )
+              )
+            ),
+            React.createElement(
+              'tbody',
+              null,
+              ...instances.map((instance, i) =>
+                React.createElement(
+                  'tr',
+                  {
+                    key: instanceKey(instance),
+                    style: {
+                      borderBottom: i === instances.length - 1 ? 'none' : '1px solid #eee',
+                      background: i % 2 === 0 ? '#fff' : '#fafafa',
+                      cursor: 'pointer',
+                    },
+                    onClick: () => navigateToInstance(instance),
+                  },
+                  React.createElement(
+                    'td',
+                    { style: { padding: '0.6rem 0.85rem', fontWeight: '600', color: '#1565c0' } },
+                    instance.name
+                  ),
+                  React.createElement(
+                    'td',
+                    { style: { padding: '0.6rem 0.85rem', color: '#555' } },
+                    instance.namespace
+                  ),
+                  React.createElement(
+                    'td',
+                    { style: { padding: '0.6rem 0.85rem', color: '#555' } },
+                    instance.k8sCluster
+                  ),
+                  React.createElement(
+                    'td',
+                    { style: { padding: '0.6rem 0.85rem', textAlign: 'right' } },
+                    React.createElement(
+                      'button',
+                      {
+                        style: { ...styles.btn(true), padding: '0.3rem 0.75rem', fontSize: '0.8rem' },
+                        onClick: (e: { stopPropagation: () => void }) => {
+                          e.stopPropagation();
+                          navigateToInstance(instance);
+                        },
+                      },
+                      'Explore'
+                    )
+                  )
+                )
               )
             )
           )
+        )
   );
 };
 
