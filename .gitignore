@@ -5,5 +5,12 @@ node_modules/
 # Go
 backend/vendor/
 
+# Go build output (e.g. `go build` in backend/ produces backend/backend or server)
+/backend/backend
+/backend/server
+
+# Tilt dev — local env override (keep dev/.env.example tracked)
+dev/.env
+
 # OS
 .DS_Store
