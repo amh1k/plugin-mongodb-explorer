@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"embed"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -532,20 +534,51 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 // main
 // ---------------------------------------------------------------------------
 
+// bundleData and bundleETag are computed once: the frontend is embedded, so it
+// never changes for the lifetime of the process (a new release ships a new
+// image, hence a new process with a new ETag).
+var (
+	bundleData    []byte
+	bundleDataErr error
+	bundleETag    string
+	bundleOnce    sync.Once
+)
+
+func loadBundle() {
+	bundleData, bundleDataErr = distFS.ReadFile("dist/main.js")
+	if bundleDataErr == nil {
+		sum := sha256.Sum256(bundleData)
+		bundleETag = `"` + hex.EncodeToString(sum[:]) + `"`
+	}
+}
+
+// handleBundle serves the dynamically loaded plugin frontend.
+//
+// The URL is stable (`main.js`), so we can't rely on a hashed filename to bust
+// the browser cache on release. Instead we serve a content-addressed ETag with
+// `no-cache`: the browser revalidates on every load and gets a cheap 304 when
+// the bundle is unchanged, but picks up a new release immediately.
+func handleBundle(w http.ResponseWriter, r *http.Request) {
+	bundleOnce.Do(loadBundle)
+	if bundleDataErr != nil {
+		http.Error(w, "bundle not found", http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("ETag", bundleETag)
+	if r.Header.Get("If-None-Match") == bundleETag {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+	_, _ = w.Write(bundleData)
+}
+
 func newMux() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	// Serve the frontend bundle — the host fetches this to load the plugin UI.
-	mux.HandleFunc("GET /main.js", func(w http.ResponseWriter, r *http.Request) {
-		data, err := distFS.ReadFile("dist/main.js")
-		if err != nil {
-			http.Error(w, "bundle not found", http.StatusNotFound)
-			return
-		}
-		w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
-		w.Header().Set("Cache-Control", "no-store")
-		_, _ = w.Write(data)
-	})
+	mux.HandleFunc("GET /main.js", handleBundle)
 
 	// Serve the plugin icon.
 	mux.HandleFunc("GET /icon.png", func(w http.ResponseWriter, r *http.Request) {
@@ -554,7 +587,8 @@ func newMux() *http.ServeMux {
 		_, _ = w.Write(iconData)
 	})
 
-	// Backend API — proxied by the host from /v1/plugins/mongo-explorer/api/*.
+	// Backend API — proxied by the host from
+	// /v1/clusters/{cluster}/plugins/{name}/api/*.
 	mux.HandleFunc("GET /api/instances", handleListInstances)
 	mux.HandleFunc("GET /api/databases", handleListDatabases)
 	mux.HandleFunc("GET /api/databases/{db}/collections", handleListCollections)

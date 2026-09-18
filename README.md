@@ -49,7 +49,7 @@ plugin-mongodb-explorer/
 **Request flow:**
 
 ```
-Browser → GET /v1/plugins/mongo-explorer/api/instances
+Browser → GET /v1/clusters/{cluster}/plugins/{name}/api/instances
          ↓ (host validates session, adds X-Everest-User JWT)
 Backend → GET /v1/clusters
           GET /v1/clusters/{cluster}/namespaces
@@ -73,16 +73,13 @@ not supported yet.
 ## Prerequisites
 
 - An OpenEverest cluster with the Plugin CRD installed (Everest v2+)
-- The OpenEverest monorepo checked out at `../openeverest` (for the local SDK reference)
 - Node.js 20+, Go 1.25+, Docker, Helm 3
 
 ## Local Development
 
 ### Build the frontend bundle
 
-The `@openeverest/plugin-sdk` package is referenced as a local file path from
-the OpenEverest monorepo. Ensure `../openeverest/ui/packages/plugin-sdk` exists,
-then:
+The `@openeverest/plugin-sdk` package is installed from npm (see `package.json`).
 
 ```bash
 npm install
